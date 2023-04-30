@@ -3,6 +3,20 @@
 import * as vscode from 'vscode';
 import * as yaml from 'js-yaml'
 
+interface Node {
+	id: string;
+	label: string;
+	shape: string;
+	parent?: string;
+	path: string;
+}
+
+interface Edge {
+	from: string;
+	to: string;
+	arrows?: string;
+}
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -28,28 +42,22 @@ export function activate(context: vscode.ExtensionContext) {
 					.then(text => yaml.load(text))
 					.then((content: any) => {
 						return Object.keys(content).flatMap(key => {
-							if('parent' in content[key]){
-								return {
-									id: key,
-									label: key,
-									shape: 'box',
-									parent: content[key].parent
-								}
-							}else{
-								return {
-									id: key,
-									label: key,
-									shape: 'box',
-								}
+							const node: Node = {
+								id: key,
+								label: key,
+								shape: 'box',
+								path: f.path
 							}
+							if(content[key].parent){
+								node.parent = content[key].parent
+							}
+							return node;
 						})
 					})
-			}))
-
-			nodes.then(nodes => {
+			})).then(nodes => {
 				const edges = nodes.flat()
-					.filter((n: any) => 'parent' in n)
-					.flatMap((n:any) => {
+					.filter((n: Node) => n.parent)
+					.flatMap((n: Node) => {
 						return {
 							from: n.parent,
 							to: n.id,
@@ -66,6 +74,9 @@ export function activate(context: vscode.ExtensionContext) {
 						panel.webview.onDidReceiveMessage(message => {
 							console.log(JSON.stringify(message))
 							vscode.window.showInformationMessage(`${message.uri}`);
+							vscode.workspace.openTextDocument(message.uri).then(doc => {
+								vscode.window.showTextDocument(doc);
+							  });
 						})
 					})
 			})
