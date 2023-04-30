@@ -1,0 +1,7 @@
+baseObject:
+  props:
+    - size
+    - date
+  tags:
+    - pic
+    - ai

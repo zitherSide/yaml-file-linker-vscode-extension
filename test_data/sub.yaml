@@ -1,0 +1,5 @@
+SubItem1:
+  parent: baseObject
+
+SubItem2:
+  parent: baseObject

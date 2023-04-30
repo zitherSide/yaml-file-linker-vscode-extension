@@ -1,0 +1,48 @@
+<html>
+<head>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+    <style type="text/css">
+        #mynetwork {
+            width: 100%;
+            height: 1080px;
+            border: 1px solid darkgray;
+        }
+    </style>
+</head>
+<body>
+<div id="mynetwork"></div>
+
+<script type="text/javascript">
+    const vscode = acquireVsCodeApi()
+
+    var nodes = new vis.DataSet(
+        __NODES__
+    );
+
+    // create an array with edges
+    var edges = new vis.DataSet(
+        __EDGES__
+    );
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+
+    // provide the data in the vis format
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {};
+
+    // initialize your network!
+    var network = new vis.Network(container, data, options);
+    network.on('click', params => {
+        console.log(JSON.stringify(params.nodes[0]))
+        const node = nodes.get(params.nodes[0])
+        console.log(JSON.stringify(node))
+	    vscode.postMessage({command: 'jump', uri: node.path});
+    })
+</script>
+</body>
+</html>
